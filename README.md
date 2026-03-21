@@ -15,9 +15,9 @@ Modular web application to automatically translate `.srt` subtitles to Latin Ame
    ```
 2. Start the live development server:
    ```bash
-   npm start
+   npm run dev
    ```
-   *(Note: `npm run dev` also works if configured)*
+   *(Note: `npm run start` and `npm start` also work interchangeably)*
 3. Open `http://localhost:1234`
 
 ## Build and Deployment
