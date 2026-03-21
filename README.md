@@ -22,7 +22,7 @@ Modular web application to automatically translate `.srt` subtitles to Latin Ame
 
 ## Build and Deployment
 
-The application uses Parcel to optimally package the resources (`HTML`, `JS` structured in modules under SOLID methodology, and `CSS` structured under SMACSS methodology) and generate them in a static directory for production.
+The application uses Parcel to optimally package the resources (HTML, JS, and CSS) and generate them in a static directory for production.
 
 - To generate a production build (`dist/`):
   ```bash
