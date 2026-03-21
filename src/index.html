@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>SRT Translator</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>SRT Translator</h1>
+      </div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="apiKey">API Key</label>
+          <input type="password" id="apiKey" placeholder="AIzaSy..." required />
+        </div>
+
+        <div class="field">
+          <label for="modelName">Model</label>
+          <input
+            id="modelName"
+            value="gemini-3.1-flash-lite-preview"
+            required
+          />
+        </div>
+
+        <div class="field">
+          <label for="sourceLang">Source Language</label>
+          <select id="sourceLang" class="input-style">
+            <option value="auto">Auto-Detect</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="fr">French</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="context">Film Context</label>
+          <input id="context" placeholder="Film title, genre, year" />
+        </div>
+
+        <div class="field">
+          <label for="file">SRT File</label>
+          <input type="file" id="file" accept=".srt" required />
+        </div>
+      </div>
+
+      <div class="controls">
+        <button id="start" class="btn-primary">Start</button>
+        <button id="stop" class="btn-stop" disabled>Stop</button>
+      </div>
+
+      <div class="status">
+        <div class="progress-bg">
+          <div id="progress" class="progress-fill"></div>
+        </div>
+
+        <div class="status-text">
+          <span id="progressText">0 / 0 lines</span>
+          <span id="eta">ETA --:--</span>
+        </div>
+      </div>
+
+      <div class="workspace">
+        <div class="panel">
+          <div class="panel-header">Console</div>
+          <div class="panel-content" id="log"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">Preview</div>
+          <textarea id="preview" readonly></textarea>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>

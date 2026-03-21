@@ -1,0 +1,16 @@
+{
+  "name": "srt-translator",
+  "version": "1.0.0",
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "dev": "parcel",
+    "build": "parcel build --public-url ./",
+    "deploy": "gh-pages -d dist"
+  },
+  "devDependencies": {
+    "@parcel/core": "^2.13.3",
+    "gh-pages": "^6.3.0",
+    "parcel": "^2.13.3"
+  }
+}
