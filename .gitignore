@@ -1,3 +1,9 @@
-.parcel-cache/
-dist/
-node_modules/
+# Binary output
+bin/
+
+# Configuration
+.env
+
+# Go environment
+go.work
+go.work.sum

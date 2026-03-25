@@ -1,35 +1,48 @@
-# SRT Translator
+# SRT Translator (Go CLI)
 
-Subtitle translator for `.srt` files into Latin American Spanish using the Gemini API.
+Professional Go CLI tool to translate `.srt` subtitle files into any language using the Google Gemini API.
 
 ## Features
-- Automatic metadata discovery (context and source language).
-- Normalization of output filenames.
-- Sequential chunked translation with previous block persistence.
-- Client-side execution in the browser.
+- **Robust JSON Architecture**: Uses structured JSON for AI communications, ensuring 100% reliable mapping.
+- **Smart Translation**: Automatically detects movie/series context for high-quality, consistent results.
+- **Language Agnostic**: Translate to any target language (Spanish, French, Italian, Japanese, etc.).
+- **High Performance**: Optimized for maximum throughput with incremental retry stability.
+- **Context Awareness**: Maintains translation consistency throughout the entire file.
+- **Robustness**: Automated retries and exponential backoff for API reliability.
+- **Minimalist**: Dependency-free core, only using the Gemini API.
 
 ## Requirements
-- Node.js
-- Google AI Studio API Key
+- Go 1.21+ (Recommended 1.24+)
+- Google AI Studio API Key (Gemini)
+
+## Installation
+Build the binary using the provided `Makefile`:
+```bash
+make build
+```
+
+## Usage
+1. Copy `.env.example` to `.env` and add your `GEMINI_API_KEY`.
+2. Run the translator:
+```bash
+./bin/srt-translator -input movie.srt -lang "Italian"
+```
+
+### Options
+- `-input`: Path to input `.srt` file (required).
+- `-output`: Custom path for the output file (optional).
+- `-lang`: Target language name (default: `Spanish`).
+- `-api-key`: Gemini API Key (defaults to `GEMINI_API_KEY` env var).
+- `-model`: Gemini model to use (default: `gemini-3.1-flash-lite-preview`).
+- `-chunk-size`: Subtitle blocks per request (default: 100).
+- `-temperature`: LLM temperature (default: 0.25).
 
 ## Development
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
-2. Start development server:
-   ```bash
-   npm run dev
-   ```
+- `make build`: Compile the tool.
+- `make run ARGS="..."`: Build and run with flags.
+- `make clean`: Remove build artifacts.
 
-## Build
-Generate production build in `dist/`:
-```bash
-npm run build
-```
-
-## Deployment
-Push `dist/` to `gh-pages` branch:
-```bash
-npm run deploy
-```
+## TODO
+- **Parallel Wave Pipeline**: Implement concurrent pipelines to further double throughput.
+- **Adaptive Rate Limiting**: Dynamic delay adjustment based on real-time API feedback.
+- **Unit Testing**: Implement comprehensive tests for internal packages.
