@@ -1,5 +1,12 @@
-node_modules/
-dist/
 .parcel-cache/
+dist/
+node_modules/
+
+# OS files
 .DS_Store
+
+# Logs
 *.log
+
+# Environment variables
+.env
