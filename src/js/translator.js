@@ -10,12 +10,18 @@ export function stopTranslation() {
 }
 
 export async function generateContext(apiKey, model, filename, sampleText) {
-  const prompt = `Based on filename "${filename}" and these lines: "${sampleText.substring(0, 300)}", 
-  provide: 
-  1. Brief context (min words, latin only).
-  2. Detected source language name.
-  3. A clean, legible movie title for the filename (e.g. "Movie Title (Year)"). 
-  Return JSON ONLY: {"context": "...", "lang": "...", "cleanName": "..."}`;
+  const prompt = `PRIMARY SOURCE: Filename "${filename}" 
+  SAMPLE TEXT (for tone/lang): "${sampleText.substring(0, 500)}"
+  
+  TASK:
+  1. Identify movie/series using FILENAME primarily.
+  2. Return JSON exactly:
+  {
+    "context": "Short summary + genre + year (Latin only)",
+    "lang": "Detected source language name",
+    "cleanName": "Movie Title (Year)"
+  }
+  JSON ONLY.`;
   
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
