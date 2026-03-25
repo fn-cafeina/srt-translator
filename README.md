@@ -1,34 +1,33 @@
 # SRT Translator
 
-Modular web application to automatically translate `.srt` subtitles to Latin American Spanish using Gemini AI. It runs entirely client-side in the browser.
+Translates `.srt` files to Latin American Spanish using Gemini AI. Runs client-side.
 
 ## Requirements
 
 - Node.js
-- Google AI Studio API Key (Gemini)
+- Google AI Studio API Key
 
-## Local Development
+## Development
 
-1. Install packaging dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
-2. Start the live development server:
+2. Start development server:
    ```bash
    npm run dev
    ```
-   *(Note: `npm run start` and `npm start` also work interchangeably)*
 3. Open `http://localhost:1234`
 
 ## Build and Deployment
 
-The application uses Parcel to optimally package the resources (HTML, JS, and CSS) and generate them in a static directory for production.
+Generate production build in `dist/`:
+```bash
+npm run build
+```
 
-- To generate a production build (`dist/`):
-  ```bash
-  npm run build
-  ```
-- To dynamically push the `dist/` folder to your repository's `gh-pages` branch:
-  ```bash
-  npm run deploy
-  ```
+Push `dist/` to `gh-pages` branch:
+```bash
+npm run deploy
+```
+
