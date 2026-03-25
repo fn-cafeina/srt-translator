@@ -11,8 +11,11 @@ export function stopTranslation() {
 
 export async function generateContext(apiKey, model, filename, sampleText) {
   const prompt = `Based on filename "${filename}" and these lines: "${sampleText.substring(0, 300)}", 
-  provide: 1. Brief context (min words, latin only), 2. Detected source language name. 
-  Return JSON ONLY: {"context": "...", "lang": "..."}`;
+  provide: 
+  1. Brief context (min words, latin only).
+  2. Detected source language name.
+  3. A clean, legible movie title for the filename (e.g. "Movie Title (Year)"). 
+  Return JSON ONLY: {"context": "...", "lang": "...", "cleanName": "..."}`;
   
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
@@ -33,7 +36,7 @@ export async function generateContext(apiKey, model, filename, sampleText) {
   try {
     return JSON.parse(data.candidates[0].content.parts[0].text);
   } catch (e) {
-    return { context: data.candidates[0].content.parts[0].text, lang: "Unknown" };
+    return { context: "Unknown", lang: "Unknown", cleanName: filename.replace(".srt", "") };
   }
 }
 

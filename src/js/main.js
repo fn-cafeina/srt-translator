@@ -21,11 +21,8 @@ DOM.startBtn.onclick = async () => {
   DOM.preview.value = "";
 
   try {
-    const text = await file.text();
-    const blocks = parseSRT(text);
-
     uiLog("Analyzing file and context...", "info");
-    const { context, lang } = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name, text);
+    const { context, lang, cleanName } = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name, text);
     uiLog(`✓ Context: ${context.substring(0, 60)}...`, "success");
     uiLog(`✓ Source: ${lang} | Blocks: ${blocks.length}`, "success");
 
@@ -47,7 +44,8 @@ DOM.startBtn.onclick = async () => {
       },
       (finalSrt, wasStopped) => {
         uiLog(wasStopped ? "Process stopped." : "Translation finished.", "success");
-        download(file.name, finalSrt, wasStopped);
+        const downloadName = cleanName ? `${cleanName}.srt` : file.name;
+        download(downloadName, finalSrt, wasStopped);
         DOM.startBtn.disabled = false;
         DOM.stopBtn.disabled = true;
       }
