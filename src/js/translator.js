@@ -10,7 +10,7 @@ export function stopTranslation() {
 }
 
 export async function generateContext(apiKey, model, filename) {
-  const prompt = `Based on the following filename, provide a short context (genre, plot summary, characters if known) for translation purposes. Filename: "${filename}"`;
+  const prompt = `Extract film context from the filename: "${filename}". Return ONLY a brief summary in English (max 20 words). Use ONLY Latin characters to avoid encoding issues.`;
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: "POST",

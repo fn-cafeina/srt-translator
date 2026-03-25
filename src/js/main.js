@@ -26,7 +26,7 @@ DOM.startBtn.onclick = async () => {
 
     uiLog("Generating film context...", "info");
     const autoContext = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name);
-    uiLog(`Context: ${autoContext.substring(0, 100)}...`, "info");
+    uiLog("✓ Film context analyzed.", "success");
 
     uiLog(`Loaded ${blocks.length} blocks.`, "info");
     uiLog(`Target: ${CONFIG.DEFAULT_MODEL} | Lang: AUTO`, "info");
