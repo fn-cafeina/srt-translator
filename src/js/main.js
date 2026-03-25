@@ -1,16 +1,10 @@
 import { DOM } from './utils/dom.js';
-import { UI } from './ui/UI.js';
-import { SRTEngine } from './core/SRTEngine.js';
-import { SubtitleTranslator } from './core/SubtitleTranslator.js';
 import { CONFIG } from './utils/config.js';
+import { parseSRT } from './core/srt.js';
+import { translateSubtitle, stopTranslation } from './core/translator.js';
+import { uiLog, updateProgress, download } from './ui/ui.js';
 
-let translatorInstance = null;
-
-DOM.stopBtn.onclick = () => {
-  if (translatorInstance) {
-    translatorInstance.stop();
-  }
-};
+DOM.stopBtn.onclick = () => stopTranslation();
 
 DOM.startBtn.onclick = async () => {
   const key = DOM.apiKey.value.trim();
@@ -29,37 +23,37 @@ DOM.startBtn.onclick = async () => {
   DOM.preview.value = "";
 
   try {
-    const textContext = await file.text();
-    const parsedBlocks = SRTEngine.parse(textContext);
+    const text = await file.text();
+    const blocks = parseSRT(text);
 
-    translatorInstance = new SubtitleTranslator(
-      key,
-      CONFIG.DEFAULT_MODEL,
-      contextMsg,
+    uiLog(`Loaded ${blocks.length} blocks.`, "info");
+    uiLog(`Target: ${CONFIG.DEFAULT_MODEL} | Lang: ${sourceLang.toUpperCase()}`, "info");
+
+    const params = {
+      apiKey: key,
+      model: CONFIG.DEFAULT_MODEL,
       sourceLang,
-    );
+      contextMsg,
+      parsedBlocks: blocks
+    };
 
-    translatorInstance.start(
-      parsedBlocks,
-      (chunkSrt, processedChunks, totalChunks, startTime, totalBlocks) => {
+    await translateSubtitle(
+      params,
+      (chunkSrt, processedChunks, totalChunks, startTime) => {
         DOM.preview.value += chunkSrt;
         DOM.preview.scrollTop = DOM.preview.scrollHeight;
-        UI.updateProgress(processedChunks, totalChunks, startTime, totalBlocks);
-        UI.log("Chunk complete", "success");
+        updateProgress(processedChunks, totalChunks, startTime, blocks.length);
+        uiLog("Chunk complete", "success");
       },
       (finalSrt, wasStopped) => {
-        UI.log(
-          wasStopped ? "Process stopped." : "Translation finished.",
-          "success",
-        );
-        UI.download(file.name, finalSrt, wasStopped);
+        uiLog(wasStopped ? "Process stopped." : "Translation finished.", "success");
+        download(file.name, finalSrt, wasStopped);
         DOM.startBtn.disabled = false;
         DOM.stopBtn.disabled = true;
-        translatorInstance = null;
-      },
+      }
     );
   } catch (error) {
-    UI.log(`Critical Error: ${error.message}`, "error");
+    uiLog(`Critical Error: ${error.message}`, "error");
     DOM.startBtn.disabled = false;
     DOM.stopBtn.disabled = true;
   }
