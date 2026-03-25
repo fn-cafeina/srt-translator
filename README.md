@@ -32,9 +32,14 @@ Build the binary using the provided `Makefile`:
 make build
 ```
 
+## Configuration
+The tool requires a **Google AI Studio API Key**. You can provide it in three ways (in order of precedence):
+1.  **Command flag**: `-api-key "your_key"`
+2.  **Environment variable**: Set `GEMINI_API_KEY="your_key"` in your `.bashrc` or `.zshrc`.
+3.  **Local file**: Create a `.env` file in the current directory with `GEMINI_API_KEY="your_key"`.
+
 ## Usage
-1. Copy `.env.example` to `.env` and add your `GEMINI_API_KEY`.
-2. Run the translator:
+Run the translator:
 ```bash
 ./bin/srt-translator -input movie.srt -lang "Italian"
 ```
