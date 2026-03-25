@@ -16,6 +16,17 @@ Professional Go CLI tool to translate `.srt` subtitle files into any language us
 - Google AI Studio API Key (Gemini)
 
 ## Installation
+
+### Binary Downloads
+Pre-built binaries for Windows, Linux, and macOS are available in the [Releases](https://github.com/fn-cafeina/srt-translator/releases) section.
+
+### Global Installation
+Install the binary directly using Go:
+```bash
+go install github.com/fn-cafeina/srt-translator/cmd/srt-translator@latest
+```
+
+### Build from Source
 Build the binary using the provided `Makefile`:
 ```bash
 make build
