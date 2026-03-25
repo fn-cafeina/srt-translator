@@ -1,14 +1,15 @@
 .container {
-  max-width: 900px;
-  margin: auto;
+  max-width: 1000px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem;
+  padding: 1.5rem;
 }
-  
+
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 1rem;
 }
 
@@ -16,33 +17,26 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
-  margin-top: 0.5rem;
+  height: 500px; /* Stable height for 'app' feel */
 }
 
 .panel {
-  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-@media (max-width: 850px) {
+.panel-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
   .workspace {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 600px) {
-  body {
-    padding: 1rem;
-  }
-  .grid {
-    grid-template-columns: 1fr;
-  }
-  .controls {
-    flex-direction: column;
-  }
-  button {
-    width: 100%;
+    height: auto;
   }
   .panel {
-    min-height: 300px;
+    height: 400px;
   }
 }
