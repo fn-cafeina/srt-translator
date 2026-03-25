@@ -9,20 +9,32 @@ export function stopTranslation() {
   if (abortController) abortController.abort();
 }
 
-export async function generateContext(apiKey, model, filename) {
-  const prompt = `Extract film context from the filename: "${filename}". Return ONLY a brief summary in English (max 20 words). Use ONLY Latin characters to avoid encoding issues.`;
+export async function generateContext(apiKey, model, filename, sampleText) {
+  const prompt = `Based on filename "${filename}" and these lines: "${sampleText.substring(0, 300)}", 
+  provide: 1. Brief context (min words, latin only), 2. Detected source language name. 
+  Return JSON ONLY: {"context": "...", "lang": "..."}`;
+  
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.5 }
+      generationConfig: { 
+        temperature: 0.2,
+        response_mime_type: "application/json"
+      }
     }),
   });
+  
   const data = await response.json();
   if (!response.ok) throw new Error(data.error?.message || `API Error: ${response.status}`);
-  return data.candidates[0].content.parts[0].text;
+  
+  try {
+    return JSON.parse(data.candidates[0].content.parts[0].text);
+  } catch (e) {
+    return { context: data.candidates[0].content.parts[0].text, lang: "Unknown" };
+  }
 }
 
 function getGenderRules(sourceLang) {

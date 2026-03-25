@@ -24,18 +24,16 @@ DOM.startBtn.onclick = async () => {
     const text = await file.text();
     const blocks = parseSRT(text);
 
-    uiLog("Generating film context...", "info");
-    const autoContext = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name);
-    uiLog("✓ Film context analyzed.", "success");
-
-    uiLog(`Loaded ${blocks.length} blocks.`, "info");
-    uiLog(`Target: ${CONFIG.DEFAULT_MODEL} | Lang: AUTO`, "info");
+    uiLog("Analyzing file and context...", "info");
+    const { context, lang } = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name, text);
+    uiLog(`✓ Context: ${context.substring(0, 60)}...`, "success");
+    uiLog(`✓ Source: ${lang} | Blocks: ${blocks.length}`, "success");
 
     const params = {
       apiKey: key,
       model: CONFIG.DEFAULT_MODEL,
       sourceLang: "auto",
-      contextMsg: autoContext,
+      contextMsg: context,
       parsedBlocks: blocks
     };
 
