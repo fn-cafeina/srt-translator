@@ -38,8 +38,3 @@ make build
 - `make build`: Compile the tool.
 - `make run ARGS="..."`: Build and run with flags.
 - `make clean`: Remove build artifacts.
-
-## TODO
-- **Parallel Wave Pipeline**: Implement concurrent pipelines to further double throughput.
-- **Adaptive Rate Limiting**: Dynamic delay adjustment based on real-time API feedback.
-- **Unit Testing**: Implement comprehensive tests for internal packages.
