@@ -1,4 +1,4 @@
-import { CONFIG } from '../utils/config.js';
+import { CONFIG } from './config.js';
 
 let isRunning = false;
 let abortController = null;

@@ -1,5 +1,5 @@
-import { DOM } from '../utils/dom.js';
-import { CONFIG } from '../utils/config.js';
+import { DOM } from './dom.js';
+import { CONFIG } from './config.js';
 
 export function uiLog(msg, type = "info") {
   const el = document.createElement("div");

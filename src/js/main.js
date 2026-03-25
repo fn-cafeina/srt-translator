@@ -1,8 +1,8 @@
-import { DOM } from './utils/dom.js';
-import { CONFIG } from './utils/config.js';
-import { parseSRT } from './core/srt.js';
-import { translateSubtitle, stopTranslation } from './core/translator.js';
-import { uiLog, updateProgress, download } from './ui/ui.js';
+import { DOM } from './dom.js';
+import { CONFIG } from './config.js';
+import { parseSRT } from './srt.js';
+import { translateSubtitle, stopTranslation } from './translator.js';
+import { uiLog, updateProgress, download } from './ui.js';
 
 DOM.stopBtn.onclick = () => stopTranslation();
 
