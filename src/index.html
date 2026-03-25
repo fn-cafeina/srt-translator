@@ -8,50 +8,53 @@
   </head>
 
   <body>
-    <div class="container">
-      <div class="header">
-        <h1>SRT Translator</h1>
-      </div>
-
-      <div class="grid">
-        <div class="field">
-          <label for="apiKey">API Key</label>
-          <input type="password" id="apiKey" placeholder="AIzaSy..." required />
+    <div class="app-layout">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <h1>SRT Translator</h1>
         </div>
 
-        <div class="field">
-          <label for="file">SRT File</label>
-          <input type="file" id="file" accept=".srt" required />
-        </div>
-      </div>
+        <div class="sidebar-content">
+          <div class="field">
+            <label for="apiKey">API Key</label>
+            <input type="password" id="apiKey" placeholder="AIzaSy..." required />
+          </div>
 
-      <div class="controls">
-        <button id="start" class="btn-primary">Start</button>
-        <button id="stop" class="btn-stop" disabled>Stop</button>
-      </div>
+          <div class="field">
+            <label for="file">SRT File</label>
+            <input type="file" id="file" accept=".srt" required />
+          </div>
 
-      <div class="status">
-        <div class="progress-bg">
-          <div id="progress" class="progress-fill"></div>
-        </div>
+          <div class="controls">
+            <button id="start" class="btn-primary">Start</button>
+            <button id="stop" class="btn-stop" disabled>Stop</button>
+          </div>
 
-        <div class="status-text">
-          <span id="progressText">0 / 0 lines</span>
-          <span id="eta">ETA --:--</span>
+          <div class="status">
+            <div class="progress-bg">
+              <div id="progress" class="progress-fill"></div>
+            </div>
+            <div class="status-text">
+              <span id="progressText">0 / 0 lines</span>
+              <span id="eta">ETA --:--</span>
+            </div>
+          </div>
         </div>
-      </div>
+      </aside>
 
-    <div class="workspace">
-        <div class="panel">
-          <div class="panel-header">Console</div>
-          <div id="log" class="panel-content"></div>
-        </div>
+      <main class="main-content">
+        <div class="workspace">
+          <div class="panel">
+            <div class="panel-header">Preview</div>
+            <textarea id="preview" readonly></textarea>
+          </div>
 
-        <div class="panel">
-          <div class="panel-header">Preview</div>
-          <textarea id="preview" readonly></textarea>
+          <div class="panel">
+            <div class="panel-header">Console</div>
+            <div id="log" class="panel-content"></div>
+          </div>
         </div>
-      </div>
+      </main>
     </div>
 
     <script type="module" src="js/main.js"></script>
