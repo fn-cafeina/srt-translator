@@ -1,15 +1,13 @@
 import { DOM } from './dom.js';
 import { CONFIG } from './config.js';
 import { parseSRT } from './srt.js';
-import { translateSubtitle, stopTranslation } from './translator.js';
+import { translateSubtitle, stopTranslation, generateContext } from './translator.js';
 import { uiLog, updateProgress, download } from './ui.js';
 
 DOM.stopBtn.onclick = () => stopTranslation();
 
 DOM.startBtn.onclick = async () => {
   const key = DOM.apiKey.value.trim();
-  const sourceLang = DOM.sourceLang.value;
-  const contextMsg = DOM.context.value;
   const file = DOM.file.files[0];
 
   if (!key || !file) {
@@ -26,14 +24,18 @@ DOM.startBtn.onclick = async () => {
     const text = await file.text();
     const blocks = parseSRT(text);
 
+    uiLog("Generating film context...", "info");
+    const autoContext = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name);
+    uiLog(`Context: ${autoContext.substring(0, 100)}...`, "info");
+
     uiLog(`Loaded ${blocks.length} blocks.`, "info");
-    uiLog(`Target: ${CONFIG.DEFAULT_MODEL} | Lang: ${sourceLang.toUpperCase()}`, "info");
+    uiLog(`Target: ${CONFIG.DEFAULT_MODEL} | Lang: AUTO`, "info");
 
     const params = {
       apiKey: key,
       model: CONFIG.DEFAULT_MODEL,
-      sourceLang,
-      contextMsg,
+      sourceLang: "auto",
+      contextMsg: autoContext,
       parsedBlocks: blocks
     };
 

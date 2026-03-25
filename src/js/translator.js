@@ -9,6 +9,22 @@ export function stopTranslation() {
   if (abortController) abortController.abort();
 }
 
+export async function generateContext(apiKey, model, filename) {
+  const prompt = `Based on the following filename, provide a short context (genre, plot summary, characters if known) for translation purposes. Filename: "${filename}"`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.5 }
+    }),
+  });
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error?.message || `API Error: ${response.status}`);
+  return data.candidates[0].content.parts[0].text;
+}
+
 function getGenderRules(sourceLang) {
   switch (sourceLang) {
     case "it":

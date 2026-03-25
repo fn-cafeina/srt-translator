@@ -7,7 +7,5 @@ export const DOM = {
   startBtn: document.getElementById("start"),
   stopBtn: document.getElementById("stop"),
   apiKey: document.getElementById("apiKey"),
-  sourceLang: document.getElementById("sourceLang"),
-  context: document.getElementById("context"),
   file: document.getElementById("file"),
 };
