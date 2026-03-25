@@ -21,6 +21,9 @@ DOM.startBtn.onclick = async () => {
   DOM.preview.value = "";
 
   try {
+    const text = await file.text();
+    const blocks = parseSRT(text);
+
     uiLog("Analyzing file and context...", "info");
     const { context, lang, cleanName } = await generateContext(key, CONFIG.DEFAULT_MODEL, file.name, text);
     uiLog(`✓ Context: ${context.substring(0, 60)}...`, "success");
