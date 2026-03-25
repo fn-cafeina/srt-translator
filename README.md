@@ -1,12 +1,12 @@
 # SRT Translator
 
-Minimalist `.srt` translator powered by Gemini. Focused on ease of use and precision.
+Subtitle translator for `.srt` files into Latin American Spanish using the Gemini API.
 
-## Key Features
-- **Zero-Config**: No need to select model or source language.
-- **Auto-Context**: Intelligent movie/series identification from filename.
-- **Smart Naming**: Generates clean, human-readable titles for translated files.
-- **Privacy-First**: 100% client-side processing.
+## Features
+- Automatic metadata discovery (context and source language).
+- Normalization of output filenames.
+- Sequential chunked translation with previous block persistence.
+- Client-side execution in the browser.
 
 ## Requirements
 - Node.js
@@ -21,16 +21,15 @@ Minimalist `.srt` translator powered by Gemini. Focused on ease of use and preci
    ```bash
    npm run dev
    ```
-3. Open `http://localhost:1234`
 
-## Build and Deployment
+## Build
 Generate production build in `dist/`:
 ```bash
 npm run build
 ```
 
+## Deployment
 Push `dist/` to `gh-pages` branch:
 ```bash
 npm run deploy
 ```
-
