@@ -15,19 +15,19 @@
 
       <div class="grid">
         <div class="field">
-          <label for="apiKey"><i data-lucide="key" class="lucide-icon"></i> API Key</label>
+          <label for="apiKey">API Key</label>
           <input type="password" id="apiKey" placeholder="AIzaSy..." required />
         </div>
 
         <div class="field">
-          <label for="file"><i data-lucide="file-up" class="lucide-icon"></i> SRT File</label>
+          <label for="file">SRT File</label>
           <input type="file" id="file" accept=".srt" required />
         </div>
       </div>
 
       <div class="controls">
-        <button id="start" class="btn-primary"><i data-lucide="play" class="lucide-icon"></i> Start</button>
-        <button id="stop" class="btn-stop" disabled><i data-lucide="square" class="lucide-icon"></i> Stop</button>
+        <button id="start" class="btn-primary">Start</button>
+        <button id="stop" class="btn-stop" disabled>Stop</button>
       </div>
 
       <div class="status">
@@ -43,21 +43,17 @@
 
     <div class="workspace">
         <div class="panel">
-          <div class="panel-header"><i data-lucide="terminal" class="lucide-icon"></i> Console</div>
+          <div class="panel-header">Console</div>
           <div id="log" class="panel-content"></div>
         </div>
 
         <div class="panel">
-          <div class="panel-header"><i data-lucide="file-text" class="lucide-icon"></i> Preview</div>
+          <div class="panel-header">Preview</div>
           <textarea id="preview" readonly></textarea>
         </div>
       </div>
     </div>
 
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <script>
-      lucide.createIcons();
-    </script>
     <script type="module" src="js/main.js"></script>
   </body>
 </html>
