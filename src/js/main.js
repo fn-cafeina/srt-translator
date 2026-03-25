@@ -32,7 +32,6 @@ DOM.startBtn.onclick = async () => {
     const params = {
       apiKey: key,
       model: CONFIG.DEFAULT_MODEL,
-      sourceLang: "auto",
       contextMsg: context,
       parsedBlocks: blocks
     };

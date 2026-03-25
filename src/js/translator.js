@@ -40,32 +40,20 @@ export async function generateContext(apiKey, model, filename, sampleText) {
   }
 }
 
-function getGenderRules(sourceLang) {
-  switch (sourceLang) {
-    case "it":
-    case "pt":
-      return "SOURCE IS ROMANCE LANGUAGE: Preserve exact gender markers. Use cultural knowledge for natural Latin American Spanish.";
-    case "fr":
-      return "SOURCE IS FRENCH: Maintain gender markers. Prioritize natural localization.";
-    case "en":
-      return "SOURCE IS ENGLISH: DO NOT DEFAULT TO MASCULINE. Paraphrase to neutrality if gender is unknown.";
-    default:
-      return "GENDER RULE: Paraphrase to neutrality if source is neutral. Maintain romance gender. Aim for natural localization.";
-  }
-}
-
-function buildSystemInstruction(sourceLang, contextMsg) {
-  const genderRule = getGenderRules(sourceLang);
+function buildSystemInstruction(contextMsg) {
   return `ROLE: Expert subtitle translator.
 TASK: Translate into natural Latin American Spanish.
 FILM CONTEXT: ${contextMsg || "General"}
-${genderRule}
+
+INSTRUCTIONS:
+1. Maintain source nuances, gender markers, and cultural context.
+2. Use natural, localized Latin American Spanish.
+3. Keep lines short (≤42 chars, max 2 lines).
 
 FORMAT:
 1. Return EXACTLY the same [ID] format.
 2. Never merge, split, or omit IDs.
-3. Keep lines short (≤42 chars). Max 2 lines.
-4. Output ONLY the translated blocks. NO introductions, NO markdown.`;
+3. Output ONLY the translated blocks. NO introductions, NO markdown.`;
 }
 
 function buildUserPrompt(chunk, partialMap = {}) {
@@ -132,7 +120,7 @@ function parseResponse(responseText) {
 }
 
 export async function translateSubtitle(params, onChunk, onFinish) {
-  const { apiKey, model, sourceLang, contextMsg, parsedBlocks } = params;
+  const { apiKey, model, contextMsg, parsedBlocks } = params;
   isRunning = true;
   abortController = new AbortController();
   memoryContext = [];
@@ -142,7 +130,7 @@ export async function translateSubtitle(params, onChunk, onFinish) {
   const startTime = Date.now();
   let finalSrt = "";
 
-  const systemInstruction = buildSystemInstruction(sourceLang, contextMsg);
+  const systemInstruction = buildSystemInstruction(contextMsg);
 
   for (let i = 0; i < parsedBlocks.length; i += CONFIG.CHUNK_SIZE) {
     if (!isRunning) break;
