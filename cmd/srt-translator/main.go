@@ -24,7 +24,7 @@ func main() {
 
 	const (
 		defaultModel       = "gemini-3.1-flash-lite-preview"
-		defaultChunkSize   = 100
+		defaultChunkSize   = 150
 		defaultTemperature = 0.25
 	)
 

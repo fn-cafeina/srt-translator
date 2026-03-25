@@ -34,11 +34,6 @@ FILM CONTEXT: %s
 INSTRUCTIONS:
 1. Maintain source nuances, gender markers, and cultural context.
 2. Use natural, localized phrasing for %s.
-3. Keep lines short (≤42 chars, max 2 lines).
-
-INSTRUCTIONS:
-1. Maintain source nuances, gender markers, and cultural context.
-2. Use natural, localized phrasing for %s.
 3. Keep lines short (≤42 chars, max 2 lines).`, lang, context, lang)
 }
 
