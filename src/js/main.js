@@ -2,6 +2,7 @@ import { DOM } from './utils/dom.js';
 import { UI } from './ui/UI.js';
 import { SRTEngine } from './core/SRTEngine.js';
 import { SubtitleTranslator } from './core/SubtitleTranslator.js';
+import { CONFIG } from './utils/config.js';
 
 let translatorInstance = null;
 
@@ -13,7 +14,6 @@ DOM.stopBtn.onclick = () => {
 
 DOM.startBtn.onclick = async () => {
   const key = DOM.apiKey.value.trim();
-  const model = DOM.modelName.value.trim();
   const sourceLang = DOM.sourceLang.value;
   const contextMsg = DOM.context.value;
   const file = DOM.file.files[0];
@@ -34,7 +34,7 @@ DOM.startBtn.onclick = async () => {
 
     translatorInstance = new SubtitleTranslator(
       key,
-      model,
+      CONFIG.DEFAULT_MODEL,
       contextMsg,
       sourceLang,
     );

@@ -6,4 +6,5 @@ export const CONFIG = {
   RETRY_DELAY_MS: 6000,
   TEMPERATURE: 0.25,
   TOP_P: 0.9,
+  DEFAULT_MODEL: "gemini-3.1-flash-lite-preview",
 };
