@@ -34,6 +34,12 @@
   flex-direction: column;
 }
 
+.controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
 .workspace {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -49,7 +55,7 @@
 
 .panel-content {
   flex: 1;
-  overflow: hidden;
+  overflow: auto;
 }
 
 @media (max-width: 1000px) {
@@ -62,5 +68,9 @@
   }
   .workspace {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .panel {
+    min-height: 400px; /* Prevent 'thin rectangles' on mobile */
   }
 }
