@@ -33,9 +33,6 @@ make build
 - `-output`: Custom path for the output file (optional).
 - `-lang`: Target language name (default: `Spanish`).
 - `-api-key`: Gemini API Key (defaults to `GEMINI_API_KEY` env var).
-- `-model`: Gemini model to use (default: `gemini-3.1-flash-lite-preview`).
-- `-chunk-size`: Subtitle blocks per request (default: 100).
-- `-temperature`: LLM temperature (default: 0.25).
 
 ## Development
 - `make build`: Compile the tool.

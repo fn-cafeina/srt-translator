@@ -19,11 +19,14 @@ func main() {
 	inputPath := flag.String("input", "", "Path to the input SRT file")
 	outputPath := flag.String("output", "", "Path to the output SRT file (optional)")
 	apiKey := flag.String("api-key", "", "Gemini API Key (optional, defaults to GEMINI_API_KEY env var)")
-	model := flag.String("model", "gemini-3.1-flash-lite-preview", "Gemini model to use")
-	chunkSize := flag.Int("chunk-size", 100, "Number of blocks per chunk")
-	temperature := flag.Float64("temperature", 0.25, "LLM temperature")
 	targetLang := flag.String("lang", "Spanish", "Target language name")
 	flag.Parse()
+
+	const (
+		defaultModel       = "gemini-3.1-flash-lite-preview"
+		defaultChunkSize   = 100
+		defaultTemperature = 0.25
+	)
 
 	if *inputPath == "" {
 		fmt.Println("Error: -input is required")
@@ -55,8 +58,8 @@ func main() {
 	client := &gemini.GeminiClient{
 		Config: gemini.Config{
 			ApiKey:      *apiKey,
-			Model:       *model,
-			Temperature: *temperature,
+			Model:       defaultModel,
+			Temperature: defaultTemperature,
 			TopP:        0.95,
 		},
 	}
@@ -90,7 +93,7 @@ func main() {
 	fmt.Printf("Translating %d blocks from %s to %s\n", len(blocks), *inputPath, *outputPath)
 
 	trans := translator.NewTranslator(translator.Config{
-		ChunkSize:    *chunkSize,
+		ChunkSize:    defaultChunkSize,
 		MemoryChunks: 1,
 		MaxRetries:   4,
 		RetryDelay:   7 * time.Second,
