@@ -1,15 +1,15 @@
-# SRT Translator (Go CLI)
+# SRT Translator CLI
 
-Professional Go CLI tool to translate `.srt` subtitle files into any language using the Gemini 3.1 Flash Preview model.
+CLI tool for translating `.srt` files using the Gemini API.
 
 ## Features
-- **Robust JSON Architecture**: Uses structured JSON for AI communications, ensuring 100% reliable mapping.
-- **Smart Translation**: Automatically detects movie/series context for high-quality, consistent results.
-- **Language Agnostic**: Translate to any target language (Spanish, French, Italian, Japanese, etc.).
-- **High Performance**: Optimized for 15 RPM / 250k TPM / 500 RPD (150 blocks per chunk, 4.1s delay).
-- **Context Awareness**: Maintains translation consistency throughout the entire file.
-- **Robustness**: Automated retries and exponential backoff for API reliability.
-- **Minimalist**: Dependency-free core, only using the Gemini API.
+- **JSON Protocol**: Structural output enforcement via JSON schema.
+- **Context Detection**: Automated analysis of subtitle context.
+- **Language Support**: Translation to any target language.
+- **Throughput Calibration**: 15 RPM / 250k TPM / 500 RPD (150 blocks/chunk, 4.1s delay).
+- **Contextual Memory**: Historical buffer for consistency.
+- **Retry Logic**: Incremental retries with exponential backoff.
+- **Minimalist**: Dependency-free Go core.
 
 ## Requirements
 - Go 1.21+ (Recommended 1.24+)
