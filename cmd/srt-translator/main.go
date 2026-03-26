@@ -17,9 +17,13 @@ import (
 func main() {
 	utils.LoadEnv()
 	inputPath := flag.String("input", "", "Path to the input SRT file")
+	flag.StringVar(inputPath, "i", "", "Path to the input SRT file (shorthand)")
 	outputPath := flag.String("output", "", "Path to the output SRT file (optional)")
+	flag.StringVar(outputPath, "o", "", "Path to the output SRT file (optional) (shorthand)")
 	apiKey := flag.String("api-key", "", "Gemini API Key (optional, defaults to GEMINI_API_KEY env var)")
+	flag.StringVar(apiKey, "k", "", "Gemini API Key (optional) (shorthand)")
 	targetLang := flag.String("lang", "Spanish", "Target language name")
+	flag.StringVar(targetLang, "l", "Spanish", "Target language name (shorthand)")
 	flag.Parse()
 
 	const (

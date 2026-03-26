@@ -45,10 +45,10 @@ Run the translator:
 ```
 
 ### Options
-- `-input`: Path to input `.srt` file (required).
-- `-output`: Custom path for the output file (optional).
-- `-lang`: Target language name (default: `Spanish`).
-- `-api-key`: Gemini API Key (defaults to `GEMINI_API_KEY` env var).
+- `-i`, `-input`: Path to input `.srt` file (required).
+- `-o`, `-output`: Custom path for the output file (optional).
+- `-l`, `-lang`: Target language name (default: `Spanish`).
+- `-k`, `-api-key`: Gemini API Key (defaults to `GEMINI_API_KEY` env var).
 
 ## Development
 - `make build`: Compile the tool.
