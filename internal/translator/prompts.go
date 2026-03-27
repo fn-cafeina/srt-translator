@@ -21,10 +21,6 @@ var translationSchema = &gemini.Schema{
 	},
 }
 
-type jsonBlock struct {
-	ID   string `json:"id"`
-	Text string `json:"text"`
-}
 
 func (t *Translator) buildSystemInstruction(lang, context string) string {
 	return fmt.Sprintf(`ROLE: Expert subtitle translator.
@@ -59,12 +55,7 @@ func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]st
 		sb.WriteString("\n")
 	}
 
-	var toTranslate []jsonBlock
-	for _, b := range chunk {
-		toTranslate = append(toTranslate, jsonBlock{ID: b.ID, Text: b.Text})
-	}
-
-	jsonBytes, _ := json.Marshal(toTranslate)
+	jsonBytes, _ := json.Marshal(chunk)
 	sb.WriteString("TARGET TO TRANSLATE:\n")
 	sb.WriteString(string(jsonBytes))
 
@@ -72,7 +63,7 @@ func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]st
 }
 
 func (t *Translator) parseResponse(raw string) map[string]string {
-	var translated []jsonBlock
+	var translated []srt.Block
 	if err := json.Unmarshal([]byte(raw), &translated); err != nil {
 		return nil
 	}

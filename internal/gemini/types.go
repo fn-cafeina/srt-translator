@@ -46,9 +46,3 @@ type Response struct {
 	} `json:"error"`
 }
 
-type ContextResponse struct {
-	Context        string `json:"context"`
-	SourceLang     string `json:"sourceLang"`
-	TargetLangCode string `json:"targetLangCode"`
-	CleanName      string `json:"cleanName"`
-}

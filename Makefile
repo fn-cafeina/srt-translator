@@ -19,7 +19,7 @@ test:
 help:
 	@echo "Available commands:"
 	@echo "  build   : Build the binary"
-	@echo "  run     : Build and run the binary (use ARGS=\"-input ...\" to pass arguments)"
+	@echo "  run     : Build and run the binary (use ARGS=\"-i ...\" to pass arguments)"
 	@echo "  clean   : Remove the bin directory"
 	@echo "  test    : Run tests"
 	@echo "  help    : Show this help"

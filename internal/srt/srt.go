@@ -11,17 +11,16 @@ var (
 )
 
 type Block struct {
-	ID        string
-	Timestamp string
-	Text      string
+	ID        string `json:"id"`
+	Timestamp string `json:"-"`
+	Text      string `json:"text"`
 }
 
-func CleanText(text string) string {
+func cleanText(text string) string {
 	return strings.TrimSpace(tagsRegex.ReplaceAllString(text, ""))
 }
 
-func ParseSRT(srtText string) ([]Block, error) {
-	// Strip UTF-8 BOM if present
+func Parse(srtText string) ([]Block, error) {
 	srtText = strings.TrimPrefix(srtText, "\ufeff")
 	srtText = strings.ReplaceAll(srtText, "\r\n", "\n")
 	
@@ -33,7 +32,6 @@ func ParseSRT(srtText string) ([]Block, error) {
 		}
 
 		id := strings.TrimSpace(lines[0])
-		// Remove any hidden control chars from ID
 		id = strings.Map(func(r rune) rune {
 			if r < 32 {
 				return -1
@@ -43,7 +41,7 @@ func ParseSRT(srtText string) ([]Block, error) {
 		timestamp := lines[1]
 		text := strings.Join(lines[2:], "\n")
 
-		cleaned := CleanText(text)
+		cleaned := cleanText(text)
 		if id != "" && timestamp != "" && cleaned != "" {
 			blocks = append(blocks, Block{
 				ID:        id,
@@ -60,7 +58,7 @@ func ParseSRT(srtText string) ([]Block, error) {
 	return blocks, nil
 }
 
-func Stringify(blocks []Block) string {
+func Encode(blocks []Block) string {
 	var sb strings.Builder
 	for _, b := range blocks {
 		sb.WriteString(b.ID)
