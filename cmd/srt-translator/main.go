@@ -16,14 +16,10 @@ import (
 
 func main() {
 	utils.LoadEnv()
-	inputPath := flag.String("input", "", "Path to the input SRT file")
-	flag.StringVar(inputPath, "i", "", "Path to the input SRT file (shorthand)")
-	outputPath := flag.String("output", "", "Path to the output SRT file (optional)")
-	flag.StringVar(outputPath, "o", "", "Path to the output SRT file (optional) (shorthand)")
-	apiKey := flag.String("api-key", "", "Gemini API Key (optional, defaults to GEMINI_API_KEY env var)")
-	flag.StringVar(apiKey, "k", "", "Gemini API Key (optional) (shorthand)")
-	targetLang := flag.String("lang", "Spanish", "Target language name")
-	flag.StringVar(targetLang, "l", "Spanish", "Target language name (shorthand)")
+	inputPath := flag.String("i", "", "Path to the input SRT file")
+	outputPath := flag.String("o", "", "Path to the output SRT file (optional)")
+	apiKey := flag.String("k", "", "Gemini API Key (optional, defaults to GEMINI_API_KEY env var)")
+	targetLang := flag.String("l", "Spanish", "Target language name")
 	flag.Parse()
 
 	const (
@@ -33,7 +29,7 @@ func main() {
 	)
 
 	if *inputPath == "" {
-		fmt.Println("Error: -input is required")
+		fmt.Println("Error: -i (input) is required")
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -43,7 +39,7 @@ func main() {
 	}
 
 	if *apiKey == "" {
-		fmt.Println("Error: API Key not found. Use -api-key or set GEMINI_API_KEY environment variable.")
+		fmt.Println("Error: API Key not found. Use -k or set GEMINI_API_KEY environment variable.")
 		os.Exit(1)
 	}
 

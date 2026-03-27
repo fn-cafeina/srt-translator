@@ -41,14 +41,14 @@ The tool requires a **Google AI Studio API Key**. You can provide it in three wa
 ## Usage
 Run the translator:
 ```bash
-./bin/srt-translator -input movie.srt -lang "Italian"
+./bin/srt-translator -i movie.srt -l "Italian"
 ```
 
 ### Options
-- `-i`, `-input`: Path to input `.srt` file (required).
-- `-o`, `-output`: Custom path for the output file (optional).
-- `-l`, `-lang`: Target language name (default: `Spanish`).
-- `-k`, `-api-key`: Gemini API Key (defaults to `GEMINI_API_KEY` env var).
+- `-i`: Path to input `.srt` file (required).
+- `-o`: Custom path for the output file (optional).
+- `-l`: Target language name (default: `Spanish`).
+- `-k`: Gemini API Key (defaults to `GEMINI_API_KEY` env var).
 
 ## Development
 - `make build`: Compile the tool.
