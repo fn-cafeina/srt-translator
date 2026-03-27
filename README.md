@@ -5,6 +5,8 @@ CLI tool for translating `.srt` files using the Gemini API.
 ## Requirements
 - Go 1.26+
 - Google AI Studio API Key (Gemini)
+  - **Model:** `gemini-3.1-flash-lite-preview`
+  - **Free Tier:** 15 RPM, 250k TPM, 500 RPD
 
 ## Installation
 
