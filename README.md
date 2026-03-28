@@ -28,14 +28,23 @@ make build
 Set the API key via the `GEMINI_API_KEY` environment variable, a `.env` file, or the `-k` flag.
 
 ```bash
+# Basic text-only translation
 ./bin/srt-translator -i movie.srt -l "Spanish"
+
+# Advanced Hybrid Audio Context (Infers vocal tone, language and gender dynamically)
+./bin/srt-translator -i movie.srt -m movie.mkv -l "Spanish"
+
+# Silent Pipeline execution (Suppresses stdout, suitable for Bazarr)
+./bin/srt-translator -i movie.srt -q
 ```
 
 ### Options
 - `-i` : Input `.srt` file path (required)
+- `-m` : Input video or audio file path to grant acoustic context to the LLM (optional)
 - `-o` : Output file path (optional)
 - `-l` : Target language (default: `Spanish`)
 - `-k` : Gemini API Key (optional via flag, required via env)
+- `-q` : Quiet mode (suppresses all terminal output for UNIX pipe integrations)
 
 ### Output Formatting
 If the `-o` flag is omitted, the tool dynamically appends the translated ISO language code to the output filename (e.g., `movie.srt` -> `movie_es.srt`). This matches standard nomenclature required by media servers like Plex, Jellyfin, and Emby.
