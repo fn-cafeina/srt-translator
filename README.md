@@ -5,8 +5,8 @@ CLI tool for translating `.srt` files using the Gemini API.
 ## Requirements
 - Go 1.26+
 - Google AI Studio API Key (Gemini)
-  - **Model:** `gemini-3.1-flash-lite-preview`
-  - **Free Tier:** 15 RPM, 250k TPM, 500 RPD
+  - Get an API key at: https://aistudio.google.com/app/apikey
+  - Model: `gemini-3.1-flash-lite-preview`
 
 ## Installation
 
@@ -35,4 +35,10 @@ Set the API key via the `GEMINI_API_KEY` environment variable, a `.env` file, or
 - `-i` : Input `.srt` file path (required)
 - `-o` : Output file path (optional)
 - `-l` : Target language (default: `Spanish`)
-- `-k` : Gemini API Key
+- `-k` : Gemini API Key (optional via flag, required via env)
+
+### Output Formatting
+If the `-o` flag is omitted, the tool dynamically appends the translated ISO language code to the output filename (e.g., `movie.srt` -> `movie_es.srt`). This matches standard nomenclature required by media servers like Plex, Jellyfin, and Emby.
+
+### Rate Limits
+The tool injects a `4100ms` delay between translation chunks. This correctly manages the `15 RPM` (Requests Per Minute) limitation forced by the Gemini Free Tier, ensuring structural integrity overhead without API drops on large file inputs.

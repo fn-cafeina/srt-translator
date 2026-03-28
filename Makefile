@@ -1,4 +1,4 @@
-.PHONY: build run clean test help
+.PHONY: build run clean test
 
 BINARY_NAME=srt-translator
 BIN_DIR=bin
@@ -15,11 +15,3 @@ clean:
 
 test:
 	go test ./internal/...
-
-help:
-	@echo "Available commands:"
-	@echo "  build   : Build the binary"
-	@echo "  run     : Build and run the binary (use ARGS=\"-i ...\" to pass arguments)"
-	@echo "  clean   : Remove the bin directory"
-	@echo "  test    : Run tests"
-	@echo "  help    : Show this help"

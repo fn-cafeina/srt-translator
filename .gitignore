@@ -1,14 +1,7 @@
-# Binary output
 bin/
-
-# Configuration
 .env
-
-# Go environment
 go.work
 go.work.sum
-
-# IDEs & OS
 .vscode/
 .idea/
 .DS_Store
