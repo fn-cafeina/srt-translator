@@ -79,7 +79,10 @@ func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string
 			fmt.Printf("\r\033[K[retry %d] missing %d blocks...\n", attempt-1, len(missing))
 		}
 
-		prompt := t.buildUserPrompt(missing, translatedMap)
+		prompt, err := t.buildUserPrompt(missing, translatedMap)
+		if err != nil {
+			return nil, fmt.Errorf("failed assembling structural prompt context for missing %d fragments: %w", len(missing), err)
+		}
 
 		var audioBlob *genai.Blob
 		if t.Config.VideoPath != "" {
@@ -126,12 +129,9 @@ func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string
 			}
 		}
 
-		if len(translatedMap) < len(chunk) {
-			if attempt < t.Config.MaxRetries {
-				time.Sleep(t.Config.RetryDelay)
-			} else {
-				lastErr = fmt.Errorf("missing translations for %d blocks", len(chunk)-len(translatedMap))
-			}
+		lastErr = fmt.Errorf("missing translations for %d blocks", len(chunk)-len(translatedMap))
+		if attempt < t.Config.MaxRetries {
+			time.Sleep(t.Config.RetryDelay)
 		}
 	}
 

@@ -44,7 +44,7 @@ INSTRUCTIONS:
 	return sys
 }
 
-func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]string) string {
+func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]string) (string, error) {
 	var memoryItems []memoryItem
 	memoryItems = append(memoryItems, t.Memory...)
 
@@ -75,11 +75,14 @@ func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]st
 		minBlocks = append(minBlocks, minBlock{I: b.ID, T: b.Text})
 	}
 
-	jsonBytes, _ := json.Marshal(minBlocks)
+	jsonBytes, err := json.Marshal(minBlocks)
+	if err != nil {
+		return "", fmt.Errorf("failed encoding translation block constraints to json memory format: %w", err)
+	}
 	sb.WriteString("TARGET TO TRANSLATE:\n")
 	sb.WriteString(string(jsonBytes))
 
-	return sb.String()
+	return sb.String(), nil
 }
 
 type translationResult struct {

@@ -22,9 +22,18 @@ func srtTimeToDuration(ts string) (time.Duration, error) {
 		return 0, fmt.Errorf("invalid srt duration format: %s", ts)
 	}
 
-	h, _ := strconv.ParseFloat(parts[0], 64)
-	m, _ := strconv.ParseFloat(parts[1], 64)
-	s, _ := strconv.ParseFloat(parts[2], 64)
+	h, err := strconv.ParseFloat(parts[0], 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse hour constraint %q from timestamp %s: %w", parts[0], ts, err)
+	}
+	m, err := strconv.ParseFloat(parts[1], 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse minute constraint %q from timestamp %s: %w", parts[1], ts, err)
+	}
+	s, err := strconv.ParseFloat(parts[2], 64)
+	if err != nil {
+		return 0, fmt.Errorf("failed to parse second constraint %q from timestamp %s: %w", parts[2], ts, err)
+	}
 
 	totalSeconds := (h * 3600) + (m * 60) + s
 	return time.Duration(totalSeconds * float64(time.Second)), nil
