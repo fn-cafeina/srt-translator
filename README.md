@@ -28,26 +28,26 @@ make build
 Set the API key via the `GEMINI_API_KEY` environment variable, a `.env` file, or the `-k` flag.
 
 ```bash
-# Basic text-only translation
+# Standard
 ./bin/srt-translator -i movie.srt -l "Spanish"
 
-# Advanced Hybrid Audio Context (Infers vocal tone, language and gender dynamically)
+# With audio context
 ./bin/srt-translator -i movie.srt -m movie.mkv -l "Spanish"
 
-# Silent Pipeline execution (Suppresses stdout, suitable for Bazarr)
+# Quiet mode
 ./bin/srt-translator -i movie.srt -q
 ```
 
 ### Options
 - `-i` : Input `.srt` file path (required)
-- `-m` : Input video or audio file path to grant acoustic context to the LLM (optional)
+- `-m` : Input media file path for audio context (optional)
 - `-o` : Output file path (optional)
 - `-l` : Target language (default: `Spanish`)
 - `-k` : Gemini API Key (optional via flag, required via env)
-- `-q` : Quiet mode (suppresses all terminal output for UNIX pipe integrations)
+- `-q` : Quiet mode (optional)
 
 ### Output Formatting
-If the `-o` flag is omitted, the tool dynamically appends the translated ISO language code to the output filename (e.g., `movie.srt` -> `movie_es.srt`). This matches standard nomenclature required by media servers like Plex, Jellyfin, and Emby.
+If `-o` is omitted, the translated ISO language code is appended to the filename (e.g., `movie.srt` -> `movie_es.srt`).
 
 ### Rate Limits
-The tool injects a `4100ms` delay between translation chunks. This correctly manages the `15 RPM` (Requests Per Minute) limitation forced by the Gemini Free Tier, ensuring structural integrity overhead without API drops on large file inputs.
+The tool enforces a 4100ms delay between translation chunks to respect the 15 RPM limit of the Gemini Free Tier.
