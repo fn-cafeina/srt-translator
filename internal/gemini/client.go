@@ -19,7 +19,7 @@ type GeminiClient struct {
 	Config Config
 }
 
-func (c *GeminiClient) GenerateText(ctx context.Context, prompt, systemInstruction string, schema *genai.Schema) (string, error) {
+func (c *GeminiClient) GenerateText(ctx context.Context, prompt, systemInstruction string, schema *genai.Schema, audioBlob *genai.Blob) (string, error) {
 	client, err := genai.NewClient(ctx, option.WithAPIKey(c.Config.ApiKey))
 	if err != nil {
 		return "", fmt.Errorf("failed to create gemini client: %w", err)
@@ -36,7 +36,13 @@ func (c *GeminiClient) GenerateText(ctx context.Context, prompt, systemInstructi
 		model.ResponseSchema = schema
 	}
 
-	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
+	var parts []genai.Part
+	if audioBlob != nil {
+		parts = append(parts, *audioBlob)
+	}
+	parts = append(parts, genai.Text(prompt))
+
+	resp, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
 		return "", fmt.Errorf("gemini api error (model: %s): %w", c.Config.Model, err)
 	}

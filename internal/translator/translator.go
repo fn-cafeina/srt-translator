@@ -3,10 +3,13 @@ package translator
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
+	"github.com/fn-cafeina/srt-translator/internal/audio"
 	"github.com/fn-cafeina/srt-translator/internal/gemini"
 	"github.com/fn-cafeina/srt-translator/internal/srt"
+	"github.com/google/generative-ai-go/genai"
 )
 
 func NewTranslator(cfg Config) *Translator {
@@ -72,23 +75,49 @@ func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string
 			return translatedMap, nil
 		}
 
-		if attempt > 1 {
+		if attempt > 1 && !t.Config.Quiet {
 			fmt.Printf("\r\033[K[retry %d] missing %d blocks...\n", attempt-1, len(missing))
 		}
 
 		prompt := t.buildUserPrompt(missing, translatedMap)
-		raw, err := t.Client.GenerateText(ctx, prompt, sysInst, translationSchema)
+
+		var audioBlob *genai.Blob
+		if t.Config.VideoPath != "" {
+			if !audio.HasFFmpeg() {
+				return nil, fmt.Errorf("ffmpeg binary not found in system PATH. Required for video/audio extraction")
+			}
+			sliced, err := audio.SliceChunk(t.Config.VideoPath, chunk[0].Timestamp, chunk[len(chunk)-1].Timestamp)
+			if err != nil {
+				return nil, fmt.Errorf("audio slicing failed: %w", err)
+			}
+
+			audioData, err := os.ReadFile(sliced)
+			os.Remove(sliced)
+			if err != nil {
+				return nil, fmt.Errorf("failed to read sliced audio: %w", err)
+			}
+			audioBlob = &genai.Blob{
+				MIMEType: "audio/mp3",
+				Data:     audioData,
+			}
+		}
+
+		raw, err := t.Client.GenerateText(ctx, prompt, sysInst, translationSchema, audioBlob)
 		if err != nil {
 			lastErr = fmt.Errorf("gemini text generation failed on attempt %d: %w", attempt, err)
 			time.Sleep(t.Config.RetryDelay)
 			continue
 		}
 
-		resMap, err := t.parseResponse(raw)
+		resMap, hasDesync, err := t.parseResponse(raw)
 		if err != nil {
 			lastErr = fmt.Errorf("failed to parse gemini response on attempt %d: %w", attempt, err)
 			time.Sleep(t.Config.RetryDelay)
 			continue
+		}
+
+		if hasDesync {
+			return nil, fmt.Errorf("AI detected critical audio/SRT desync at blocks [%s-%s]. Aborting translation globally", chunk[0].ID, chunk[len(chunk)-1].ID)
 		}
 
 		for _, b := range missing {

@@ -14,6 +14,8 @@ type Config struct {
 	ApiDelay     time.Duration
 	GeminiConfig gemini.Config
 	TargetLang   string
+	VideoPath    string
+	Quiet        bool
 }
 
 type Translator struct {

@@ -25,6 +25,8 @@ type Config struct {
 	OutputPath string
 	ApiKey     string
 	TargetLang string
+	VideoPath  string
+	Quiet      bool
 }
 
 func parseConfig() (Config, error) {
@@ -36,6 +38,8 @@ func parseConfig() (Config, error) {
 	outputPath := flag.String("o", "", "Path to the output SRT file (optional)")
 	apiKey := flag.String("k", "", "Gemini API Key (optional, defaults to GEMINI_API_KEY env var)")
 	targetLang := flag.String("l", "Spanish", "Target language name")
+	mediaPath := flag.String("m", "", "Path to the input video or audio file (optional)")
+	quiet := flag.Bool("q", false, "Quiet mode (suppress all terminal console output)")
 	flag.Parse()
 
 	if *inputPath == "" {
@@ -57,6 +61,8 @@ func parseConfig() (Config, error) {
 		OutputPath: *outputPath,
 		ApiKey:     finalApiKey,
 		TargetLang: *targetLang,
+		VideoPath:  *mediaPath,
+		Quiet:      *quiet,
 	}, nil
 }
 
@@ -78,23 +84,31 @@ func setupTranslator(cfg Config) *translator.Translator {
 		ApiDelay:     4100 * time.Millisecond,
 		GeminiConfig: client.Config,
 		TargetLang:   cfg.TargetLang,
+		VideoPath:    cfg.VideoPath,
+		Quiet:        cfg.Quiet,
 	})
 }
 
-func detectContext(trans *translator.Translator, filename string, blocks []srt.Block) (*translator.ContextResponse, error) {
+func detectContext(trans *translator.Translator, filename string, blocks []srt.Block, quiet bool) (*translator.ContextResponse, error) {
 	sample := ""
 	for i := 0; i < min(len(blocks), 5); i++ {
 		sample += blocks[i].Text + " "
 	}
 
-	fmt.Print("detecting context... ")
+	if !quiet {
+		fmt.Print("detecting context... ")
+	}
 	ctxResp, err := trans.DetectContext(filename, sample)
 	if err != nil {
-		fmt.Printf("failed\n\n")
+		if !quiet {
+			fmt.Printf("failed\n\n")
+		}
 		return nil, fmt.Errorf("context detection failed: %w", err)
 	}
 
-	fmt.Printf("done (%s -> %s)\n\n", strings.ToLower(ctxResp.SourceLang), strings.ToLower(ctxResp.TargetLangCode))
+	if !quiet {
+		fmt.Printf("done (%s -> %s)\n\n", strings.ToLower(ctxResp.SourceLang), strings.ToLower(ctxResp.TargetLangCode))
+	}
 	return ctxResp, nil
 }
 
@@ -117,7 +131,7 @@ func Run() error {
 	trans := setupTranslator(cfg)
 	filename := filepath.Base(cfg.InputPath)
 
-	ctxResp, err := detectContext(trans, filename, blocks)
+	ctxResp, err := detectContext(trans, filename, blocks, cfg.Quiet)
 	if err != nil {
 		return err
 	}
@@ -128,12 +142,19 @@ func Run() error {
 		cfg.OutputPath = fmt.Sprintf("%s_%s%s", base, ctxResp.TargetLangCode, ext)
 	}
 
-	fmt.Printf("translating %d blocks...\n", len(blocks))
+	if !cfg.Quiet {
+		fmt.Printf("translating %d blocks...\n", len(blocks))
+	}
 
 	finalBlocks, err := trans.Translate(blocks, ctxResp.Context, func(processed, total int) {
-		fmt.Printf("\r\033[Kprogress: %d/%d (%.1f%%)", processed, total, float64(processed)/float64(total)*100)
+		if !cfg.Quiet {
+			fmt.Printf("\r\033[Kprogress: %d/%d (%.1f%%)", processed, total, float64(processed)/float64(total)*100)
+		}
 	})
-	fmt.Println()
+
+	if !cfg.Quiet {
+		fmt.Println()
+	}
 
 	if err != nil {
 		return fmt.Errorf("translation failed for %q: %w", cfg.InputPath, err)
@@ -144,6 +165,8 @@ func Run() error {
 		return fmt.Errorf("failed to write output file to %q: %w", cfg.OutputPath, err)
 	}
 
-	fmt.Printf("\nsuccess. saved to %s\n", cfg.OutputPath)
+	if !cfg.Quiet {
+		fmt.Printf("\nsuccess. saved to %s\n", cfg.OutputPath)
+	}
 	return nil
 }

@@ -10,19 +10,26 @@ import (
 )
 
 var translationSchema = &genai.Schema{
-	Type: genai.TypeArray,
-	Items: &genai.Schema{
-		Type: genai.TypeObject,
-		Properties: map[string]*genai.Schema{
-			"id":   {Type: genai.TypeString},
-			"text": {Type: genai.TypeString},
+	Type: genai.TypeObject,
+	Properties: map[string]*genai.Schema{
+		"r": {
+			Type: genai.TypeArray,
+			Items: &genai.Schema{
+				Type: genai.TypeObject,
+				Properties: map[string]*genai.Schema{
+					"i": {Type: genai.TypeString},
+					"t": {Type: genai.TypeString},
+					"d": {Type: genai.TypeBoolean},
+				},
+				Required: []string{"i", "t", "d"},
+			},
 		},
-		Required: []string{"id", "text"},
 	},
+	Required: []string{"r"},
 }
 
 func (t *Translator) buildSystemInstruction(lang, context string) string {
-	return fmt.Sprintf(`ROLE: Expert subtitle translator.
+	sys := fmt.Sprintf(`ROLE: Expert subtitle translator.
 TASK: Translate into natural %s.
 FILM CONTEXT: %s
 
@@ -30,6 +37,11 @@ INSTRUCTIONS:
 1. Maintain source nuances, gender markers, and cultural context.
 2. Use natural, localized phrasing for %s.
 3. Keep lines short (≤42 chars, max 2 lines).`, lang, context, lang)
+
+	if t.Config.VideoPath != "" {
+		sys += "\n4. Listen to the attached audio snippet corresponding to these subtitles. Identify correct voice genders, emotions, and tones.\n5. If the audio is completely desynchronized from the text timing context, set the 'd' flag to true."
+	}
+	return sys
 }
 
 func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]string) string {
@@ -54,22 +66,45 @@ func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]st
 		sb.WriteString("\n")
 	}
 
-	jsonBytes, _ := json.Marshal(chunk)
+	type minBlock struct {
+		I string `json:"i"`
+		T string `json:"t"`
+	}
+	var minBlocks []minBlock
+	for _, b := range chunk {
+		minBlocks = append(minBlocks, minBlock{I: b.ID, T: b.Text})
+	}
+
+	jsonBytes, _ := json.Marshal(minBlocks)
 	sb.WriteString("TARGET TO TRANSLATE:\n")
 	sb.WriteString(string(jsonBytes))
 
 	return sb.String()
 }
 
-func (t *Translator) parseResponse(raw string) (map[string]string, error) {
-	var translated []srt.Block
-	if err := json.Unmarshal([]byte(raw), &translated); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal JSON response from Gemini: %w", err)
+type translationResult struct {
+	I string `json:"i"`
+	T string `json:"t"`
+	D bool   `json:"d"`
+}
+
+type translationResponse struct {
+	R []translationResult `json:"r"`
+}
+
+func (t *Translator) parseResponse(raw string) (map[string]string, bool, error) {
+	var resp translationResponse
+	if err := json.Unmarshal([]byte(raw), &resp); err != nil {
+		return nil, false, fmt.Errorf("failed to unmarshal JSON response from Gemini: %w", err)
 	}
 
 	mapping := make(map[string]string)
-	for _, b := range translated {
-		mapping[b.ID] = b.Text
+	hasDesync := false
+	for _, b := range resp.R {
+		mapping[b.I] = b.T
+		if b.D {
+			hasDesync = true
+		}
 	}
-	return mapping, nil
+	return mapping, hasDesync, nil
 }

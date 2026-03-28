@@ -31,7 +31,7 @@ func (t *Translator) DetectContext(filename, sample string) (*ContextResponse, e
 	sysInst := "Expert subtitle analyst. Detect context and suggest a clean filename and ISO code."
 	ctxBackground := context.Background()
 
-	raw, err := t.Client.GenerateText(ctxBackground, prompt, sysInst, contextSchema)
+	raw, err := t.Client.GenerateText(ctxBackground, prompt, sysInst, contextSchema, nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to detect context for file %q: %w", filename, err)
 	}
