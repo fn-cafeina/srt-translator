@@ -21,7 +21,6 @@ var translationSchema = &gemini.Schema{
 	},
 }
 
-
 func (t *Translator) buildSystemInstruction(lang, context string) string {
 	return fmt.Sprintf(`ROLE: Expert subtitle translator.
 TASK: Translate into natural %s.
@@ -62,15 +61,15 @@ func (t *Translator) buildUserPrompt(chunk []srt.Block, partialMap map[string]st
 	return sb.String()
 }
 
-func (t *Translator) parseResponse(raw string) map[string]string {
+func (t *Translator) parseResponse(raw string) (map[string]string, error) {
 	var translated []srt.Block
 	if err := json.Unmarshal([]byte(raw), &translated); err != nil {
-		return nil
+		return nil, fmt.Errorf("failed to unmarshal JSON response from Gemini: %w", err)
 	}
 
 	mapping := make(map[string]string)
 	for _, b := range translated {
 		mapping[b.ID] = b.Text
 	}
-	return mapping
+	return mapping, nil
 }

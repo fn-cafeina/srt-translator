@@ -24,10 +24,10 @@ func (t *Translator) Translate(blocks []srt.Block, contextMsg string, onProgress
 	for i := 0; i < total; i += t.Config.ChunkSize {
 		end := min(i+t.Config.ChunkSize, total)
 		chunk := blocks[i:end]
-		
+
 		translatedMap, err := t.processChunk(chunk, systemInstruction)
 		if err != nil {
-			return nil, fmt.Errorf("translation failed after %d attempts: %w", t.Config.MaxRetries, err)
+			return nil, fmt.Errorf("translation failed for blocks [%s-%s]: %w", chunk[0].ID, chunk[len(chunk)-1].ID, err)
 		}
 
 		for _, b := range chunk {
@@ -56,7 +56,7 @@ func (t *Translator) Translate(blocks []srt.Block, contextMsg string, onProgress
 
 func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string]string, error) {
 	translatedMap := make(map[string]string)
-	var err error
+	var lastErr error
 
 	for attempt := 1; attempt <= t.Config.MaxRetries; attempt++ {
 		var missing []srt.Block
@@ -75,20 +75,34 @@ func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string
 		}
 
 		prompt := t.buildUserPrompt(missing, translatedMap)
-		var raw string
-		raw, err = t.Client.GenerateText(prompt, sysInst, translationSchema)
-		if err == nil {
-			resMap := t.parseResponse(raw)
-			for _, b := range missing {
-				if val, ok := resMap[b.ID]; ok && val != "" {
-					translatedMap[b.ID] = val
-				}
+		raw, err := t.Client.GenerateText(prompt, sysInst, translationSchema)
+		if err != nil {
+			lastErr = fmt.Errorf("gemini text generation failed on attempt %d: %w", attempt, err)
+			time.Sleep(t.Config.RetryDelay)
+			continue
+		}
+
+		resMap, err := t.parseResponse(raw)
+		if err != nil {
+			lastErr = fmt.Errorf("failed to parse gemini response on attempt %d: %w", attempt, err)
+			time.Sleep(t.Config.RetryDelay)
+			continue
+		}
+
+		for _, b := range missing {
+			if val, ok := resMap[b.ID]; ok && val != "" {
+				translatedMap[b.ID] = val
 			}
 		}
 
-		if attempt < t.Config.MaxRetries && len(translatedMap) < len(chunk) {
-			time.Sleep(t.Config.RetryDelay)
+		if len(translatedMap) < len(chunk) {
+			if attempt < t.Config.MaxRetries {
+				time.Sleep(t.Config.RetryDelay)
+			} else {
+				lastErr = fmt.Errorf("missing translations for %d blocks", len(chunk)-len(translatedMap))
+			}
 		}
 	}
-	return translatedMap, err
+
+	return translatedMap, fmt.Errorf("failed to translate all blocks after %d attempts: %v", t.Config.MaxRetries, lastErr)
 }
