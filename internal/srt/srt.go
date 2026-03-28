@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	tagsRegex   = regexp.MustCompile(`<[^>]+>|{[^}]+}`)
+	tagsRegex = regexp.MustCompile(`<[^>]+>|{[^}]+}`)
 )
 
 type Block struct {
@@ -23,12 +23,15 @@ func cleanText(text string) string {
 func Parse(srtText string) ([]Block, error) {
 	srtText = strings.TrimPrefix(srtText, "\ufeff")
 	srtText = strings.ReplaceAll(srtText, "\r\n", "\n")
-	
+
 	var blocks []Block
 	for raw := range strings.SplitSeq(strings.TrimSpace(srtText), "\n\n") {
 		lines := strings.Split(strings.TrimSpace(raw), "\n")
-		if len(lines) < 3 {
+		if len(lines) == 1 && lines[0] == "" {
 			continue
+		}
+		if len(lines) < 3 {
+			return nil, fmt.Errorf("malformed SRT block, expected at least 3 lines but got %d: %q", len(lines), raw)
 		}
 
 		id := strings.TrimSpace(lines[0])
@@ -38,21 +41,27 @@ func Parse(srtText string) ([]Block, error) {
 			}
 			return r
 		}, id)
-		timestamp := lines[1]
-		text := strings.Join(lines[2:], "\n")
-
-		cleaned := cleanText(text)
-		if id != "" && timestamp != "" && cleaned != "" {
-			blocks = append(blocks, Block{
-				ID:        id,
-				Timestamp: timestamp,
-				Text:      cleaned,
-			})
+		if id == "" {
+			return nil, fmt.Errorf("malformed SRT block, missing or invalid ID: %q", raw)
 		}
+
+		timestamp := strings.TrimSpace(lines[1])
+		if timestamp == "" {
+			return nil, fmt.Errorf("malformed SRT block %q, missing timestamp: %q", id, raw)
+		}
+
+		text := strings.Join(lines[2:], "\n")
+		cleaned := cleanText(text)
+
+		blocks = append(blocks, Block{
+			ID:        id,
+			Timestamp: timestamp,
+			Text:      cleaned, // We allow empty text as it can legitimately appear in some SRTS
+		})
 	}
 
 	if len(blocks) == 0 {
-		return nil, fmt.Errorf("no valid blocks found")
+		return nil, fmt.Errorf("no valid blocks found in SRT file")
 	}
 
 	return blocks, nil
