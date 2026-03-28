@@ -31,12 +31,12 @@ func (t *Translator) DetectContext(filename, sample string) (*ContextResponse, e
 
 	raw, err := t.Client.GenerateText(prompt, sysInst, contextSchema)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to detect context for file %q: %w", filename, err)
 	}
 
 	var ctx ContextResponse
 	if err := json.Unmarshal([]byte(raw), &ctx); err != nil {
-		return &ContextResponse{Context: "Unknown", SourceLang: "Unknown", CleanName: filename}, nil
+		return nil, fmt.Errorf("failed to parse context response for file %q: %w", filename, err)
 	}
 
 	return &ctx, nil

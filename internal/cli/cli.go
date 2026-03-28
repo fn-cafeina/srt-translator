@@ -20,8 +20,18 @@ const (
 	defaultTemperature = 0.25
 )
 
-func Run() error {
-	env.LoadEnv()
+type Config struct {
+	InputPath  string
+	OutputPath string
+	ApiKey     string
+	TargetLang string
+}
+
+func parseConfig() (Config, error) {
+	if err := env.LoadEnv(); err != nil {
+		return Config{}, fmt.Errorf("loading environment variables: %w", err)
+	}
+
 	inputPath := flag.String("i", "", "Path to the input SRT file")
 	outputPath := flag.String("o", "", "Path to the output SRT file (optional)")
 	apiKey := flag.String("k", "", "Gemini API Key (optional, defaults to GEMINI_API_KEY env var)")
@@ -30,47 +40,48 @@ func Run() error {
 
 	if *inputPath == "" {
 		flag.Usage()
-		return fmt.Errorf("-i (input) is required")
+		return Config{}, fmt.Errorf("mandatory flag -i (input path) is missing")
 	}
 
-	if *apiKey == "" {
-		*apiKey = os.Getenv("GEMINI_API_KEY")
+	finalApiKey := *apiKey
+	if finalApiKey == "" {
+		finalApiKey = os.Getenv("GEMINI_API_KEY")
 	}
 
-	if *apiKey == "" {
-		return fmt.Errorf("API Key not found. Use -k or set GEMINI_API_KEY environment variable")
+	if finalApiKey == "" {
+		return Config{}, fmt.Errorf("gemini api key is missing")
 	}
 
-	content, err := os.ReadFile(*inputPath)
-	if err != nil {
-		return fmt.Errorf("reading input file: %w", err)
-	}
+	return Config{
+		InputPath:  *inputPath,
+		OutputPath: *outputPath,
+		ApiKey:     finalApiKey,
+		TargetLang: *targetLang,
+	}, nil
+}
 
-	blocks, err := srt.Parse(string(content))
-	if err != nil {
-		return fmt.Errorf("parsing SRT: %w", err)
-	}
-
+func setupTranslator(cfg Config) *translator.Translator {
 	client := &gemini.GeminiClient{
 		Config: gemini.Config{
-			ApiKey:      *apiKey,
+			ApiKey:      cfg.ApiKey,
 			Model:       defaultModel,
 			Temperature: defaultTemperature,
 			TopP:        0.95,
 		},
 	}
 
-	trans := translator.NewTranslator(translator.Config{
+	return translator.NewTranslator(translator.Config{
 		ChunkSize:    defaultChunkSize,
 		MemoryChunks: 1,
 		MaxRetries:   4,
 		RetryDelay:   7 * time.Second,
 		ApiDelay:     4100 * time.Millisecond,
 		GeminiConfig: client.Config,
-		TargetLang:   *targetLang,
+		TargetLang:   cfg.TargetLang,
 	})
+}
 
-	filename := filepath.Base(*inputPath)
+func detectContext(trans *translator.Translator, filename string, blocks []srt.Block) (*translator.ContextResponse, error) {
 	sample := ""
 	for i := 0; i < min(len(blocks), 5); i++ {
 		sample += blocks[i].Text + " "
@@ -80,20 +91,41 @@ func Run() error {
 	ctxResp, err := trans.DetectContext(filename, sample)
 	if err != nil {
 		fmt.Printf("failed\n\n")
-		ctxResp = &translator.ContextResponse{
-			Context:        "General",
-			SourceLang:     "Unknown",
-			TargetLangCode: "translated",
-			CleanName:      filename,
-		}
-	} else {
-		fmt.Printf("done (%s -> %s)\n\n", strings.ToLower(ctxResp.SourceLang), strings.ToLower(ctxResp.TargetLangCode))
+		return nil, fmt.Errorf("context detection failed: %w", err)
 	}
 
-	if *outputPath == "" {
-		ext := filepath.Ext(*inputPath)
-		base := strings.TrimSuffix(*inputPath, ext)
-		*outputPath = fmt.Sprintf("%s_%s%s", base, ctxResp.TargetLangCode, ext)
+	fmt.Printf("done (%s -> %s)\n\n", strings.ToLower(ctxResp.SourceLang), strings.ToLower(ctxResp.TargetLangCode))
+	return ctxResp, nil
+}
+
+func Run() error {
+	cfg, err := parseConfig()
+	if err != nil {
+		return err
+	}
+
+	content, err := os.ReadFile(cfg.InputPath)
+	if err != nil {
+		return fmt.Errorf("failed to read input file %q: %w", cfg.InputPath, err)
+	}
+
+	blocks, err := srt.Parse(string(content))
+	if err != nil {
+		return fmt.Errorf("failed to parse SRT file %q: %w", cfg.InputPath, err)
+	}
+
+	trans := setupTranslator(cfg)
+	filename := filepath.Base(cfg.InputPath)
+
+	ctxResp, err := detectContext(trans, filename, blocks)
+	if err != nil {
+		return err
+	}
+
+	if cfg.OutputPath == "" {
+		ext := filepath.Ext(cfg.InputPath)
+		base := strings.TrimSuffix(cfg.InputPath, ext)
+		cfg.OutputPath = fmt.Sprintf("%s_%s%s", base, ctxResp.TargetLangCode, ext)
 	}
 
 	fmt.Printf("translating %d blocks...\n", len(blocks))
@@ -104,14 +136,14 @@ func Run() error {
 	fmt.Println()
 
 	if err != nil {
-		return fmt.Errorf("during translation: %w", err)
+		return fmt.Errorf("translation failed for %q: %w", cfg.InputPath, err)
 	}
 
 	finalContent := srt.Encode(finalBlocks)
-	if err := os.WriteFile(*outputPath, []byte(finalContent), 0644); err != nil {
-		return fmt.Errorf("writing output file: %w", err)
+	if err := os.WriteFile(cfg.OutputPath, []byte(finalContent), 0644); err != nil {
+		return fmt.Errorf("failed to write output file to %q: %w", cfg.OutputPath, err)
 	}
 
-	fmt.Printf("\nsuccess. saved to %s\n", *outputPath)
+	fmt.Printf("\nsuccess. saved to %s\n", cfg.OutputPath)
 	return nil
 }
