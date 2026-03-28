@@ -1,63 +1,54 @@
 package gemini
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"net/http"
+
+	"github.com/google/generative-ai-go/genai"
+	"google.golang.org/api/option"
 )
+
+type Config struct {
+	ApiKey      string
+	Model       string
+	Temperature float64
+	TopP        float64
+}
 
 type GeminiClient struct {
 	Config Config
 }
 
-func (c *GeminiClient) call(reqBody RequestBody) (string, error) {
-	url := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent?key=%s", c.Config.Model, c.Config.ApiKey)
-
-	jsonBody, err := json.Marshal(reqBody)
+func (c *GeminiClient) GenerateText(ctx context.Context, prompt, systemInstruction string, schema *genai.Schema) (string, error) {
+	client, err := genai.NewClient(ctx, option.WithAPIKey(c.Config.ApiKey))
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal gemini request body: %w", err)
+		return "", fmt.Errorf("failed to create gemini client: %w", err)
+	}
+	defer client.Close()
+
+	model := client.GenerativeModel(c.Config.Model)
+	model.SetTemperature(float32(c.Config.Temperature))
+	model.SetTopP(float32(c.Config.TopP))
+	model.SystemInstruction = &genai.Content{Parts: []genai.Part{genai.Text(systemInstruction)}}
+
+	if schema != nil {
+		model.ResponseMIMEType = "application/json"
+		model.ResponseSchema = schema
 	}
 
-	resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonBody))
+	resp, err := model.GenerateContent(ctx, genai.Text(prompt))
 	if err != nil {
-		return "", fmt.Errorf("failed to execute POST request to gemini api (model: %s): %w", c.Config.Model, err)
-	}
-	defer resp.Body.Close()
-
-	var response Response
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return "", fmt.Errorf("failed to decode gemini response body (status: %d): %w", resp.StatusCode, err)
+		return "", fmt.Errorf("gemini api error (model: %s): %w", c.Config.Model, err)
 	}
 
-	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("gemini API returned error status %d: %s (model: %s)", resp.StatusCode, response.Error.Message, c.Config.Model)
-	}
-
-	if len(response.Candidates) == 0 || len(response.Candidates[0].Content.Parts) == 0 {
+	if len(resp.Candidates) == 0 || len(resp.Candidates[0].Content.Parts) == 0 {
 		return "", fmt.Errorf("gemini API returned empty candidates response (model: %s)", c.Config.Model)
 	}
 
-	return response.Candidates[0].Content.Parts[0].Text, nil
-}
-
-func (c *GeminiClient) GenerateText(prompt, systemInstruction string, schema *Schema) (string, error) {
-	config := &GenerationConfig{
-		Temperature: c.Config.Temperature,
-		TopP:        c.Config.TopP,
-	}
-	if schema != nil {
-		config.ResponseMimeType = "application/json"
-		config.ResponseSchema = schema
+	part := resp.Candidates[0].Content.Parts[0]
+	if txt, ok := part.(genai.Text); ok {
+		return string(txt), nil
 	}
 
-	req := RequestBody{
-		SystemInstruction: &Content{Parts: []Part{{Text: systemInstruction}}},
-		Contents: []Content{
-			{Role: "user", Parts: []Part{{Text: prompt}}},
-		},
-		GenerationConfig: config,
-	}
-
-	return c.call(req)
+	return "", fmt.Errorf("unexpected gemini response part type for model %s: %T", c.Config.Model, part)
 }

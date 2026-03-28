@@ -5,17 +5,17 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/fn-cafeina/srt-translator/internal/gemini"
 	"github.com/fn-cafeina/srt-translator/internal/srt"
+	"github.com/google/generative-ai-go/genai"
 )
 
-var translationSchema = &gemini.Schema{
-	Type: "array",
-	Items: &gemini.Schema{
-		Type: "object",
-		Properties: map[string]gemini.Schema{
-			"id":   {Type: "string"},
-			"text": {Type: "string"},
+var translationSchema = &genai.Schema{
+	Type: genai.TypeArray,
+	Items: &genai.Schema{
+		Type: genai.TypeObject,
+		Properties: map[string]*genai.Schema{
+			"id":   {Type: genai.TypeString},
+			"text": {Type: genai.TypeString},
 		},
 		Required: []string{"id", "text"},
 	},

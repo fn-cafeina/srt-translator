@@ -1,6 +1,7 @@
 package translator
 
 import (
+	"context"
 	"fmt"
 	"time"
 
@@ -57,6 +58,7 @@ func (t *Translator) Translate(blocks []srt.Block, contextMsg string, onProgress
 func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string]string, error) {
 	translatedMap := make(map[string]string)
 	var lastErr error
+	ctx := context.Background()
 
 	for attempt := 1; attempt <= t.Config.MaxRetries; attempt++ {
 		var missing []srt.Block
@@ -75,7 +77,7 @@ func (t *Translator) processChunk(chunk []srt.Block, sysInst string) (map[string
 		}
 
 		prompt := t.buildUserPrompt(missing, translatedMap)
-		raw, err := t.Client.GenerateText(prompt, sysInst, translationSchema)
+		raw, err := t.Client.GenerateText(ctx, prompt, sysInst, translationSchema)
 		if err != nil {
 			lastErr = fmt.Errorf("gemini text generation failed on attempt %d: %w", attempt, err)
 			time.Sleep(t.Config.RetryDelay)
